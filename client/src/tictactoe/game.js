@@ -13,7 +13,7 @@ const styleBoard = {
   border: "4px solid darkblue",
   borderRadius: "10px",
   width: "250px",
-  height: "1000px",
+  height: "250px",
   margin: "0 auto",
   display: "grid",
   gridTemplate: "repeat(3, 1fr) / repeat(3, 1fr)",
@@ -34,7 +34,7 @@ const Board = ({ squares, onClick }) => (
 );
 
 export default function Game({ socket, roomID, username }) {
-  const [board, setBoard] = useState(Array(361).fill(null));
+  const [board, setBoard] = useState(Array(9).fill(null));
   var checkWinner = calculateWinner(board);
 
   const [gameStatus, setGameStatus] = useState("loading");

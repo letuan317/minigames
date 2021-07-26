@@ -5,13 +5,16 @@ import { socket } from "socketio";
 
 import { ChatHomepage, ChatAppmain } from "chat/home";
 import { CaroHomepage, CaroAppmain } from "caro/home";
-
+import GameDemo from "game_demo";
 function App() {
   return (
     <Router>
       <div className="App">
         <Switch>
           <Route path="/" exact>
+            <GameDemo />
+          </Route>
+          <Route path="/caro" exact>
             <CaroHomepage socket={socket} />
           </Route>
           <Route path="/caro/:room/:username" component={CaroAppmain} />

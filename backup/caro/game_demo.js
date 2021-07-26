@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 
 const styleSquare = {
   background: "lightblue",
-  border: "1px solid darkblue",
-  fontSize: "20px",
+  border: "2px solid darkblue",
+  fontSize: "30px",
   fontWeight: "800",
   cursor: "pointer",
   outline: "none",
@@ -11,12 +11,12 @@ const styleSquare = {
 
 const styleBoard = {
   border: "4px solid darkblue",
-  borderRadius: "5px",
-  width: "500px",
-  height: "500px",
+  borderRadius: "10px",
+  width: "250px",
+  height: "250px",
   margin: "0 auto",
   display: "grid",
-  gridTemplate: "repeat(19, 1fr) / repeat(19, 1fr)",
+  gridTemplate: "repeat(3, 1fr) / repeat(3, 1fr)",
 };
 
 const Square = ({ value, onClick }) => (
@@ -34,7 +34,7 @@ const Board = ({ squares, onClick }) => (
 );
 
 export default function GameDemo() {
-  const [board, setBoard] = useState(Array(361).fill(null));
+  const [board, setBoard] = useState(Array(9).fill(null));
   const [xIsNext, setXisNext] = useState(true);
   const winner = calculateWinner(board);
 
@@ -60,6 +60,7 @@ export default function GameDemo() {
           {winner ? (
             <>
               <p>Winner: {winner}</p>
+              <button onClick={newGame}>New Game</button>
             </>
           ) : (
             "Next Player: " + (xIsNext ? "X" : "O")

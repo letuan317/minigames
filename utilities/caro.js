@@ -27,7 +27,8 @@ function caro_rand_piece() {
 //Initialize a new board to a room
 function caro_new_game(Rooms, roomID) {
   currentRoom = Rooms.get(roomID);
-  const board = Array(9).fill(null);
+  //const board = Array(9).fill(null);
+  const board = Array(361).fill(null);
   currentRoom.board = board;
 }
 
