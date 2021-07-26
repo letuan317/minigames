@@ -1,0 +1,23 @@
+{
+  "name": "minigames",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/letuan317/minigames.git",
+  "author": "letuan317 <letuan317@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "socket.io": "^4.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "heroku-postbuild": "cd client && npm install && npm run build",
+    "client": "cd client && npm start"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
+}
