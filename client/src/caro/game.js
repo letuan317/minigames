@@ -1,32 +1,22 @@
 import React, { useState, useEffect } from "react";
+import "./game.scss";
 
-const styleSquare = {
-  background: "lightblue",
-  border: "2px solid darkblue",
-  fontSize: "30px",
-  fontWeight: "800",
-  cursor: "pointer",
-  outline: "none",
-};
-
-const styleBoard = {
-  border: "4px solid darkblue",
-  borderRadius: "10px",
-  width: "250px",
-  height: "1000px",
-  margin: "0 auto",
-  display: "grid",
-  gridTemplate: "repeat(3, 1fr) / repeat(3, 1fr)",
-};
-
-const Square = ({ value, onClick }) => (
-  <button style={styleSquare} onClick={onClick}>
-    {value}
-  </button>
-);
+function Square({ value, onClick }) {
+  var class_css = "caroSquare";
+  if (value === "O") {
+    class_css = "caroSquare caro-o";
+  } else if (value === "X") {
+    class_css = "caroSquare caro-x";
+  }
+  return (
+    <button className={class_css} onClick={onClick}>
+      {value}
+    </button>
+  );
+}
 
 const Board = ({ squares, onClick }) => (
-  <div style={styleBoard}>
+  <div className="caroBoard">
     {squares.map((square, i) => (
       <Square key={i} value={square} onClick={() => onClick(i)} />
     ))}
@@ -76,7 +66,6 @@ export default function Game({ socket, roomID, username }) {
 
   const newGame = () => {
     socket.emit("caro_create_new_game", { roomID, username });
-    setBoard(Array(9).fill(null));
   };
 
   useEffect(() => {

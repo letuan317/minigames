@@ -11,10 +11,10 @@ function App() {
     <Router>
       <div className="App">
         <Switch>
-          <Route path="/" exact>
+          <Route path="/demo" exact>
             <GameDemo />
           </Route>
-          <Route path="/caro" exact>
+          <Route path="/" exact>
             <CaroHomepage socket={socket} />
           </Route>
           <Route path="/caro/:room/:username" component={CaroAppmain} />

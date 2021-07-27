@@ -11,6 +11,14 @@ class caro_player {
   }
 }
 
+class caro_history {
+  constructor(board, turn, last_move) {
+    this.board = board;
+    this.turn = turn;
+    this.last_move = last_move;
+  }
+}
+
 function caro_make_room(Rooms) {
   var roomID = rand_room_id();
   while (Rooms.has(roomID)) {
@@ -28,7 +36,7 @@ function caro_rand_piece() {
 function caro_new_game(Rooms, roomID) {
   currentRoom = Rooms.get(roomID);
   //const board = Array(9).fill(null);
-  const board = Array(361).fill(null);
+  const board = Array(400).fill(null);
   currentRoom.board = board;
 }
 
@@ -82,7 +90,7 @@ function caro_check_winner(board) {
 }
 
 function caro_create_new_board() {
-  return new Array(9).fill(null);
+  return new Array(400).fill(null);
 }
 
 function caro_switch_turn(turn) {

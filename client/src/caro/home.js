@@ -80,7 +80,7 @@ export function CaroHomepage({ socket }) {
 export function CaroAppmain(props) {
   return (
     <React.Fragment>
-      <div className="carocontainer">
+      <div className="caroContainer">
         <Game
           socket={socket}
           roomID={props.match.params.room}
