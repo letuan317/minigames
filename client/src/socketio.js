@@ -1,6 +1,8 @@
 import io from "socket.io-client";
 
-export const socket = io.connect("http://192.168.1.27:8000/", {
+const url_proxy = "http://192.168.1.27:8000/";
+
+export const socket = io.connect(url_proxy, {
   transports: ["websocket", "polling", "flashsocket"],
 });
 
