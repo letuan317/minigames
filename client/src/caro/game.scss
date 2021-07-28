@@ -1,29 +1,125 @@
-$background: rgb(198, 239, 253);
+@import url("https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Press+Start+2P&display=swap");
+
+$background-board: rgb(198, 239, 253);
+$background-square: rgb(198, 239, 253);
+$background-square-last-move: rgb(226, 238, 115);
 $border: rgb(127, 214, 243);
+$background-info: rgb(88, 100, 100);
+$min-board: 500px;
+$max-board: 700px;
 .caroContainer {
+  background-color: black;
+  .caro-o {
+    color: #2a9d8f;
+  }
+  .caro-x {
+    color: #e76f51;
+  }
+  .top {
+    background-color: $background-info;
+    display: flex;
+    align-items: center;
+    width: clamp($min-board, 80vw, $max-board);
+    margin-bottom: 5px;
+    padding-top: 10px;
+
+    .player {
+      .avatar {
+        display: flex;
+        align-items: center;
+        font-size: 3vw;
+      }
+      .player-name {
+        position: relative;
+        font-size: 1.5rem;
+      }
+    }
+    .info {
+      .roomid {
+        text-align: center;
+        margin-bottom: 0px;
+        display: flex;
+        b {
+          color: #f4a261;
+        }
+      }
+      .scoreboard {
+        display: flex;
+        align-items: center;
+        letter-spacing: 5px;
+        font-size: 30px;
+        padding-bottom: 10px;
+        .piece {
+          font-family: "Permanent Marker", cursive;
+          padding: 0 40px;
+        }
+      }
+    }
+  }
   .caroBoard {
     border: 4px solid $border;
     border-radius: 5px;
-    width: 500px;
-    height: 500px;
+    width: clamp($min-board, 80vw, $max-board);
+    height: clamp($min-board, 80vw, $max-board);
     margin: 0 auto;
     display: grid;
     grid-template: repeat(20, 1fr) / repeat(20, 1fr);
   }
 
   .caroSquare {
-    background: $background;
+    background: $background-square;
     border: 1px solid $border;
-    font-size: 15px;
     font-weight: 800;
     cursor: pointer;
     outline: none;
+    font-family: "Permanent Marker", cursive;
+    font-size: clamp(0.9rem, 2vw, 1.6rem);
   }
 
-  .caro-o {
-    color: green;
+  .caro-last-move {
+    background: $background-square-last-move;
   }
-  .caro-x {
-    color: red;
+
+  .bottom {
+    background-color: $background-info;
+    display: flex;
+    align-items: center;
+    width: clamp($min-board, 80vw, $max-board);
+    margin-top: 5px;
+    padding: 10px;
+    padding-bottom: 15px;
+    border-radius: 5px 5px 5px;
+    .button {
+      margin: 0 20px;
+      color: white;
+      font-family: "Press Start 2P", cursive;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      border: none;
+      outline: none;
+      box-shadow: 0 3px #999;
+      border-radius: 15px;
+      padding: 15px 25px;
+      font-size: 0.8rem;
+      @media (max-width: 800px) {
+        margin: 0 10px;
+        border-radius: 15px;
+        padding: 10px 10px;
+        font-size: 0.8rem;
+      }
+    }
+    .start-game {
+      background-color: #2a9d8f;
+    }
+    .undo {
+      background-color: #264653;
+    }
+    .draw {
+      background-color: #e9c46a;
+    }
+    .leave {
+      background-color: #e76f51;
+    }
   }
 }

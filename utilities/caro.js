@@ -12,10 +12,10 @@ class caro_player {
 }
 
 class caro_history {
-  constructor(board, turn, last_move) {
+  constructor(board, turn, lastMove) {
     this.board = board;
     this.turn = turn;
-    this.last_move = last_move;
+    this.last_move = lastMove;
   }
 }
 
@@ -24,7 +24,13 @@ function caro_make_room(Rooms) {
   while (Rooms.has(roomID)) {
     roomID = rand_room();
   }
-  Rooms.set(roomID, { roomID: roomID, players: [], board: [] });
+  Rooms.set(roomID, {
+    roomID: roomID,
+    players: [],
+    board: [],
+    history: [],
+    lastWinner: null,
+  });
   return roomID;
 }
 
@@ -36,8 +42,8 @@ function caro_rand_piece() {
 function caro_new_game(Rooms, roomID) {
   currentRoom = Rooms.get(roomID);
   //const board = Array(9).fill(null);
-  const board = Array(400).fill(null);
-  currentRoom.board = board;
+  currentRoom.board = caro_create_new_board();
+  currentRoom.history = [];
 }
 
 //Put the newly joined player into a room's player list
@@ -103,6 +109,7 @@ function caro_switch_turn(turn) {
 
 module.exports = {
   caro_player,
+  caro_history,
   caro_make_room,
   caro_rand_piece,
   caro_new_game,
