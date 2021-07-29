@@ -56,8 +56,6 @@ function update_client(userID, roomID) {
 
 //initializing the socket io connection
 io.on("connection", (socket) => {
-  userID = socket.id;
-
   socket.on("test-client", (message) => {
     console.log(message);
   });
@@ -115,7 +113,8 @@ io.on("connection", (socket) => {
   /* +++++++++++++++++++++++++++++++++++++++++++++++++*/
 
   /* +++++++++++++++++++++++ Demo ++++++++++++++++++++++++++*/
-  socket.on("caro_create_new_room", (username) => {
+  socket.on("caro_create_new_room", ({ username, rule }) => {
+    const userID = socket.id;
     console.log(
       "caro_create_new_room",
       username,
@@ -124,6 +123,8 @@ io.on("connection", (socket) => {
     );
 
     const roomID = caro_make_room(Rooms);
+    var currentRoom = Rooms.get(roomID);
+    currentRoom.rule = rule;
     socket.join(roomID);
 
     const player = new caro_player(userID, username, roomID);
@@ -152,7 +153,7 @@ io.on("connection", (socket) => {
       if (numberOfPlayers == 1) {
         if (players[0].name !== username) {
           console.log("caro_join_room", roomID, username, "can join");
-          userID = socket.id;
+          const userID = socket.id;
           socket.join(roomID);
 
           const player = new caro_player(userID, username, roomID);
@@ -182,24 +183,26 @@ io.on("connection", (socket) => {
   });
 
   socket.on("caro_game_status", ({ roomID, username }) => {
-    const numberOfPlayers = caro_get_number_of_players(Rooms, roomID);
+    if (Rooms.has(roomID)) {
+      const numberOfPlayers = caro_get_number_of_players(Rooms, roomID);
 
-    console.log(
-      "caro_game_status",
-      roomID,
-      username,
-      "request ",
-      numberOfPlayers
-    );
-    const currentRoom = Rooms.get(roomID);
-    const players = currentRoom.players;
-    var message = "";
-    if (numberOfPlayers == 1) {
-      message = "waiting";
-      io.to(roomID).emit("caro_game_status", { message, players });
-    } else if (numberOfPlayers == 2) {
-      message = "welcome";
-      io.to(roomID).emit("caro_game_status", { message, players });
+      console.log(
+        "caro_game_status",
+        roomID,
+        username,
+        "request ",
+        numberOfPlayers
+      );
+      const currentRoom = Rooms.get(roomID);
+      const players = currentRoom.players;
+      var message = "";
+      if (numberOfPlayers == 1) {
+        message = "waiting";
+        io.to(roomID).emit("caro_game_status", { message, players });
+      } else if (numberOfPlayers == 2) {
+        message = "welcome";
+        io.to(roomID).emit("caro_game_status", { message, players });
+      }
     }
   });
 
@@ -215,7 +218,9 @@ io.on("connection", (socket) => {
       console.log("caro_create_new_game", roomID, "exists");
       var currentRoom = Rooms.get(roomID);
       caro_new_game(Rooms, roomID);
-      var turn = caro_rand_piece();
+      var turn = "";
+      const rule = currentRoom.rule;
+      console.log("last-winner", currentRoom.lastWinner);
       if (currentRoom.lastWinner === null) {
         turn = caro_rand_piece();
         caro_piece_assignment(Rooms, roomID);
@@ -231,6 +236,7 @@ io.on("connection", (socket) => {
       io.to(roomID).emit("caro_created_new_game", {
         players: currentRoom.players,
         turn: turn,
+        rule: rule,
       });
       io.to(roomID).emit("caro_update_board", {
         board: currentRoom.board,
@@ -246,7 +252,7 @@ io.on("connection", (socket) => {
     console.log("caro_update_board", roomID, "request update board");
 
     if (Rooms.has(roomID)) {
-      console.log("caro_update_board", roomID, boardCopy, turn, last_move);
+      console.log("caro_update_board", roomID, turn, last_move);
       var currentRoom = Rooms.get(roomID);
       const history = new caro_history(currentRoom.board, turn, last_move);
       currentRoom.history.unshift(history);
@@ -289,9 +295,60 @@ io.on("connection", (socket) => {
     }
   });
 
+  //undo last moved
+  socket.on("caro_undo_game", ({ roomID, username }) => {
+    const currentRoom = Rooms.get(roomID);
+    if (currentRoom.history.length > 0) {
+      var player = "";
+      if (username === currentRoom.players[0].name) {
+        player = currentRoom.players[1];
+      } else {
+        player = currentRoom.players[0];
+      }
+      io.to(player.id).emit("caro_request_undo_game");
+    }
+  });
+  socket.on("caro_undo_game_comfirmed", ({ roomID, username }) => {
+    const currentRoom = Rooms.get(roomID);
+    if (currentRoom.history.length > 0) {
+      io.to(roomID).emit("caro_update_board", {
+        board: currentRoom.history[0].board,
+        turn: currentRoom.history[0].turn,
+        lastMove: currentRoom.history[0].lastMove,
+      });
+      io.to(roomID).emit("caro_request_undo_game_comfirmed", true);
+      currentRoom.history.shift();
+    }
+  });
+  socket.on("caro_undo_game_uncomfirmed", ({ roomID, username }) => {
+    io.to(roomID).emit("caro_request_undo_game_comfirmed", false);
+  });
+
+  // request draw game
+  socket.on("caro_draw_game", ({ roomID, username }) => {
+    const currentRoom = Rooms.get(roomID);
+    if (currentRoom.history.length > 0) {
+      var player = "";
+      if (username === currentRoom.players[0].name) {
+        player = currentRoom.players[1];
+      } else {
+        player = currentRoom.players[0];
+      }
+      io.to(player.id).emit("caro_request_draw_game");
+    }
+  });
+  socket.on("caro_draw_game_uncomfirmed", ({ roomID, username }) => {
+    io.to(roomID).emit("caro_request_draw_game_comfirmed", false);
+  });
+
+  socket.on("caro_send_emoji", ({ roomID, emoji }) => {
+    console.log(emoji);
+    io.to(roomID).emit("caro_emoji", emoji);
+  });
   //when the user exits the room
 
   socket.on("disconnect", () => {
+    const userID = socket.id;
     const index = AllClients.findIndex((client) => client.userID === userID);
 
     if (index !== -1) {
@@ -309,7 +366,9 @@ io.on("connection", (socket) => {
           const numberOfPlayers = caro_get_number_of_players(Rooms, roomID);
 
           if (numberOfPlayers == 1) {
-            io.to(roomID).emit("caro_game_status", "waiting");
+            const message = "waiting";
+
+            io.to(roomID).emit("caro_game_status", { message, players });
             console.log(
               "disconnect",
               userID,

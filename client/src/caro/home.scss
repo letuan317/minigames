@@ -1,35 +1,58 @@
 @import "_globals";
 
 .carohomepage {
-  width: 500px;
-  height: 500px;
+  width: 90%;
+  height: 90%;
   padding: 2rem;
   background-color: #2d343e;
   display: flex;
   justify-content: space-evenly;
   flex-direction: column;
   border-radius: 5px;
+  overflow: hidden;
   input {
     height: 50px;
     width: 80%;
     background-color: #404450;
     border: none;
     padding-left: 1rem;
+    margin: 0 auto;
+
     border-radius: 5px;
     &:focus {
       outline: none;
     }
   }
-  button {
-    font-size: 1rem;
-    padding: 0.5rem 1rem 0.5rem 1rem;
-    width: 100px;
-    border: none;
-    background-color: #ffac41;
-    border-radius: 5px;
 
-    color: black;
-    &:hover {
+  .rules {
+    margin-left: 10%;
+    margin-right: 10%;
+    position: relative;
+    input[type="radio"] {
+      width: clamp(5px, 100%, 20px);
+      position: absolute;
+      top: -13px;
+      left: 0;
+    }
+    label {
+      width: 90%;
+      margin-left: 10%;
+    }
+  }
+
+  .button-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    button {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      width: clamp(45%, 90%, 45%);
+      margin: 0 auto;
+      border: none;
+      background-color: #ffac41;
+      border-radius: 5px;
+      color: black;
       cursor: pointer;
     }
   }

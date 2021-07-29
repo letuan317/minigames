@@ -1,6 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { BsPersonSquare } from "react-icons/bs";
+import AccountBoxIcon from "@material-ui/icons/AccountBox";
+import "reactjs-popup/dist/index.css";
+
 import "./game.scss";
+import useSound from "use-sound";
+
+import sound_write from "../assests/sounds/writing-scribble-on-paper.mp3";
+import sound_firework from "../assests/sounds/firework.mp3";
+import sound_button from "../assests/sounds/arcade-game-jump-coin.mp3";
+import sound_notification from "../assests/sounds/retro-arcade-casino-notification.mp3";
+import sound_error from "../assests/sounds/computer-error.mp3";
+import sound_game_start from "../assests/sounds/medieval-show-fanfare-announcement.mp3";
+import sound_game_over from "../assests/sounds/game-over.mp3";
+import sound_countdown from "../assests/sounds/countdown.mp3";
+import sound_yawn_long from "../assests/sounds/long-yawn.mp3";
+
+import gif_cry from "../assests/images/cry.gif";
+
+import { caroCalculateWinner, caroCalculateWinner5 } from "./utilities";
 
 function Square({ value, onClick, highlight }) {
   var class_css = "caroSquare";
@@ -44,17 +61,32 @@ const Board = ({ squares, onClick, lastMove }) => (
 
 export default function Game({ socket, roomID, username }) {
   const [board, setBoard] = useState(Array(361).fill(null));
-  var checkWinner = calculateWinner(board);
+  var checkWinner = "";
 
   const [gameStatus, setGameStatus] = useState("loading");
   const [piece, setPiece] = useState("");
   const [turn, setTurn] = useState("");
+  const [rule, setRule] = useState("rule1");
   const [isYourTurn, setIsYourTurn] = useState(false);
   const [winner, setWinner] = useState(null);
   const [points, setPoints] = useState(0);
   const [opponentPlayer, setOpponentPlayer] = useState("");
   const [opponentPoints, setOpponentPoints] = useState(0);
   const [lastMove, setLastMove] = useState(0);
+  const [undoRequest, setUndoRequest] = useState(false);
+  const [drawRequest, setDrawRequest] = useState(false);
+  const [notify, setNotify] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const [playWrite] = useSound(sound_write);
+  const [playFirework] = useSound(sound_firework, { volume: 0.5 });
+  const [playButton] = useSound(sound_button);
+  const [playNotification] = useSound(sound_notification);
+  const [playError] = useSound(sound_error);
+  const [playNewGame] = useSound(sound_game_start, { volume: 0.5 });
+  const [playGameOver] = useSound(sound_game_over);
+  const [playCountDown] = useSound(sound_countdown);
+  const [playYawnLong] = useSound(sound_yawn_long);
 
   if (gameStatus === "loading") {
     console.log("loading");
@@ -64,6 +96,10 @@ export default function Game({ socket, roomID, username }) {
   const handleClick = (i) => {
     const boardCopy = [...board];
     if (boardCopy[i] === null) {
+      playWrite();
+      if (notify) {
+        setNotify(false);
+      }
       // Put an X or an O in the clicked square
       boardCopy[i] = piece;
 
@@ -75,8 +111,13 @@ export default function Game({ socket, roomID, username }) {
       socket.emit("caro_update_board", { roomID, boardCopy, turn, last_move });
       //setXisNext(!xIsNext);
       // If user click an occupied square or if game is won, return
-      checkWinner = caroCalculateWinner(boardCopy, i);
+      if (rule === "rule1") {
+        checkWinner = caroCalculateWinner5(boardCopy, i);
+      } else {
+        checkWinner = caroCalculateWinner(boardCopy, i);
+      }
 
+      console.log("checkWinner", checkWinner);
       if (checkWinner) {
         console.log("checkWinner", checkWinner);
         socket.emit("caro_check_end_game", { roomID, checkWinner });
@@ -85,28 +126,75 @@ export default function Game({ socket, roomID, username }) {
     }
   };
 
-  const handleClickNothing = (i) => {};
+  const handleClickNothing = (i) => {
+    playError();
+  };
 
   const newGame = () => {
+    playNewGame();
+    playButton();
     socket.emit("caro_create_new_game", { roomID, username });
   };
-  const undoGame = () => {};
-  const drawGame = () => {};
-  const leaveGame = () => {};
+  const undoGame = () => {
+    playButton();
+    socket.emit("caro_undo_game", { roomID, username });
+  };
+  const requestundoyes = () => {
+    playButton();
+    socket.emit("caro_undo_game_comfirmed", { roomID, username });
+    setUndoRequest(false);
+  };
+  const requestundono = () => {
+    playButton();
+    socket.emit("caro_undo_game_uncomfirmed", { roomID, username });
+    setUndoRequest(false);
+  };
+  const drawGame = () => {
+    playButton();
+    socket.emit("caro_draw_game", { roomID, username });
+  };
+  const requestdrawyes = () => {
+    playButton();
+    socket.emit("caro_create_new_game", { roomID, username });
+    setDrawRequest(false);
+  };
+  const requestdrawno = () => {
+    playButton();
+    socket.emit("caro_draw_game_uncomfirmed", { roomID, username });
+    setDrawRequest(false);
+  };
+  const notifyClose = () => {
+    setNotify(false);
+    console.log("clicked");
+  };
+
+  const sendEmoji1 = () => {
+    const emoji = "countdown";
+    socket.emit("caro_send_emoji", { roomID, emoji });
+  };
+
+  const sendEmoji2 = () => {
+    const emoji = "yawn-long";
+    socket.emit("caro_send_emoji", { roomID, emoji });
+  };
 
   useEffect(() => {
     socket.on("caro_game_status", ({ message, players }) => {
       console.log("gameStatus", message);
       setGameStatus(message);
-      if (players[0].name === username) {
-        setPiece(players[0].piece);
-        if (message !== "waiting") {
-          setOpponentPlayer(players[1].name);
-        }
-      } else {
-        setPiece(players[1].piece);
-        if (message !== "waiting") {
-          setOpponentPlayer(players[0].name);
+      console.log("%cTest", "color: yellow");
+      console.log(players);
+      if (players.length === 2) {
+        if (players[0].name === username) {
+          setPiece(players[0].piece);
+          if (message !== "waiting") {
+            setOpponentPlayer(players[1].name);
+          }
+        } else {
+          setPiece(players[1].piece);
+          if (message !== "waiting") {
+            setOpponentPlayer(players[0].name);
+          }
         }
       }
     });
@@ -121,13 +209,22 @@ export default function Game({ socket, roomID, username }) {
         setOpponentPlayer(data.players[0].name);
       }
       setWinner(null);
+      setRule(data.rule);
+      playNewGame();
     });
 
     socket.on("caro_update_board", (data) => {
-      console.log("caro_update_board", data.board, data.lastMove);
+      console.log("caro_update_board", data.lastMove);
       setBoard(data.board);
       setTurn(data.turn);
       setLastMove(data.lastMove);
+
+      if (notify) {
+        setNotify(false);
+      }
+      if (data.turn !== piece) {
+        playNotification();
+      }
     });
 
     socket.on("caro_end_game", (data) => {
@@ -140,6 +237,37 @@ export default function Game({ socket, roomID, username }) {
         setPoints(data.players[1].points);
         setOpponentPoints(data.players[0].points);
       }
+
+      if (data.player_win === username) {
+        playFirework();
+      } else {
+        playGameOver();
+      }
+    });
+
+    socket.on("caro_request_undo_game", () => {
+      setUndoRequest(true);
+    });
+    socket.on("caro_request_undo_game_comfirmed", (check) => {
+      setNotify(true);
+      if (check === true) {
+        setMessage("Accepted to undo last move");
+      } else {
+        setMessage("Not accept to undo last move");
+      }
+      playNotification();
+    });
+    socket.on("caro_request_draw_game", () => {
+      setDrawRequest(true);
+    });
+    socket.on("caro_request_draw_game_comfirmed", (check) => {
+      setNotify(true);
+      if (check === true) {
+        setMessage("Accepted to undo last move");
+      } else {
+        setMessage("Not accept to draw last move, continue play");
+      }
+      playNotification();
     });
 
     if (turn === piece) {
@@ -147,7 +275,35 @@ export default function Game({ socket, roomID, username }) {
     } else {
       setIsYourTurn(false);
     }
-  }, [socket, turn, piece, username, board, lastMove]);
+
+    socket.on("caro_emoji", (emoji) => {
+      console.log(emoji);
+      switch (emoji) {
+        case "countdown":
+          playCountDown();
+          break;
+        case "yawn-long":
+          playYawnLong();
+          break;
+        default:
+          break;
+      }
+    });
+  }, [
+    socket,
+    turn,
+    piece,
+    username,
+    board,
+    lastMove,
+    notify,
+    playFirework,
+    playNotification,
+    playNewGame,
+    playGameOver,
+    playCountDown,
+    playYawnLong,
+  ]);
 
   switch (gameStatus) {
     case "waiting":
@@ -156,7 +312,7 @@ export default function Game({ socket, roomID, username }) {
           <div className="top">
             <div className="player">
               <div className="avatar">
-                <BsPersonSquare />
+                <AccountBoxIcon />
               </div>
               <div className="player-name" style={{ color: "coral" }}>
                 {username}
@@ -167,18 +323,29 @@ export default function Game({ socket, roomID, username }) {
                 <h5>
                   Room: <b>{roomID}</b>
                 </h5>
+                <h5 style={{ marginLeft: "5px", marginRight: "5px" }}>
+                  {rule}
+                </h5>
               </div>
               <div className="scoreboard"></div>
             </div>
             <div className="player">
               <div className="avatar">
-                <BsPersonSquare />
+                <AccountBoxIcon />
               </div>
               <div className="player-name">Waiting...</div>
             </div>
           </div>
           <div className="bottom">
             <h1>Waiting ...</h1>
+            <div className="controller">
+              <button
+                className="button leave"
+                onClick={(event) => (window.location.href = "/")}
+              >
+                Leave
+              </button>
+            </div>
           </div>
         </>
       );
@@ -190,7 +357,7 @@ export default function Game({ socket, roomID, username }) {
           <div className="top">
             <div className="player">
               <div className="avatar">
-                <BsPersonSquare />
+                <AccountBoxIcon />
               </div>
               <div className="player-name" style={{ color: "coral" }}>
                 {username}
@@ -200,6 +367,9 @@ export default function Game({ socket, roomID, username }) {
               <div className="roomid">
                 <h5>
                   Room: <b>{roomID}</b>
+                </h5>
+                <h5 style={{ marginLeft: "5px", marginRight: "5px" }}>
+                  {rule}
                 </h5>
               </div>{" "}
               <div className="scoreboard">
@@ -212,7 +382,7 @@ export default function Game({ socket, roomID, username }) {
             </div>
             <div className="player">
               <div className="avatar">
-                <BsPersonSquare />
+                <AccountBoxIcon />
               </div>
               <div className="player-name">{opponentPlayer}</div>
             </div>
@@ -222,7 +392,10 @@ export default function Game({ socket, roomID, username }) {
               <button className="button start-game" onClick={newGame}>
                 New Game
               </button>
-              <button className="button leave" onClick={leaveGame}>
+              <button
+                className="button leave"
+                onClick={(event) => (window.location.href = "/")}
+              >
                 Leave
               </button>
             </div>
@@ -237,38 +410,113 @@ export default function Game({ socket, roomID, username }) {
           <div className="top">
             <div className="player">
               <div className="avatar">
-                <BsPersonSquare />
+                <AccountBoxIcon />
               </div>
-              <div className="player-name" style={{ color: "coral" }}>
-                {username}
-              </div>
+              {isYourTurn ? (
+                <div className="player-name" style={{ color: "coral" }}>
+                  {username}
+                </div>
+              ) : (
+                <div className="player-name" style={{ color: "white" }}>
+                  {username}
+                </div>
+              )}
             </div>
             <div className="info">
               <div className="roomid">
                 <h5>
                   Room: <b>{roomID}</b>
                 </h5>
+                <h5 style={{ marginLeft: "5px", marginRight: "5px" }}>
+                  {rule}
+                </h5>
                 <h5>
                   Turn: <b>{isYourTurn ? "You" : opponentPlayer}</b>
                 </h5>
               </div>
               <div className="scoreboard">
-                <div className="piece">{piece}</div>
+                {piece === "X" ? (
+                  <div className="piece caro-x">X</div>
+                ) : (
+                  <div className="piece caro-o">O</div>
+                )}
                 <div className="points">
                   {points} : {opponentPoints}
                 </div>
-                <div className="piece">
-                  {piece === "X" ? "O" : piece === "O" ? "X" : ""}
-                </div>
+
+                {piece === "X" ? (
+                  <div className="piece caro-o">O</div>
+                ) : piece === "O" ? (
+                  <div className="piece caro-x">X</div>
+                ) : (
+                  <div className="piece"></div>
+                )}
               </div>
             </div>
             <div className="player">
               <div className="avatar">
-                <BsPersonSquare />
+                <AccountBoxIcon />
               </div>
-              <div className="player-name">{opponentPlayer}</div>
+              {isYourTurn ? (
+                <div className="player-name">{opponentPlayer}</div>
+              ) : (
+                <div className="player-name" style={{ color: "coral" }}>
+                  {opponentPlayer}
+                </div>
+              )}
             </div>
           </div>
+          {undoRequest ? (
+            <div class="overlay">
+              <div class="popup">
+                <p>
+                  <i>{opponentPlayer} </i>request undo last move
+                </p>
+                <div class="controller">
+                  <button class="button undo" onClick={requestundono}>
+                    NO
+                  </button>
+                  <button class="button start-game" onClick={requestundoyes}>
+                    YES
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div></div>
+          )}
+
+          {drawRequest ? (
+            <div class="overlay">
+              <div class="popup">
+                <p>
+                  {opponentPlayer} request draw this game, and start new game
+                </p>
+                <div class="controller">
+                  <button class="button undo" onClick={requestdrawno}>
+                    NO
+                  </button>
+                  <button class="button start-game" onClick={requestdrawyes}>
+                    YES
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div></div>
+          )}
+
+          {notify ? (
+            <div class="alert">
+              <button class="closebtn" onclick={notifyClose}>
+                &times;
+              </button>
+              <strong>Message!</strong> {message}
+            </div>
+          ) : (
+            <div></div>
+          )}
+
           {isYourTurn ? (
             <Board squares={board} lastMove={lastMove} onClick={handleClick} />
           ) : (
@@ -280,18 +528,31 @@ export default function Game({ socket, roomID, username }) {
           )}
           <div className="bottom">
             <div className="controller">
-              <button className="button start-game" onClick={newGame}>
-                New Game
-              </button>
-
-              <button className="button undo" onClick={undoGame}>
-                Undo
-              </button>
+              {isYourTurn ? (
+                <div />
+              ) : (
+                <button className="button undo" onClick={undoGame}>
+                  Undo
+                </button>
+              )}
               <button className="button draw" onClick={drawGame}>
                 Draw
               </button>
-              <button className="button leave" onClick={leaveGame}>
+              <button
+                className="button leave"
+                onClick={(event) => (window.location.href = "/")}
+              >
                 Leave
+              </button>
+            </div>
+          </div>
+          <div className="bottom">
+            <div className="controller">
+              <button className="button emoji01" onClick={sendEmoji1}>
+                ⏰ CountDown
+              </button>
+              <button className="button emoji02" onClick={sendEmoji2}>
+                🥱 Yawn
               </button>
             </div>
           </div>
@@ -305,7 +566,7 @@ export default function Game({ socket, roomID, username }) {
           <div className="top">
             <div className="player">
               <div className="avatar">
-                <BsPersonSquare />
+                <AccountBoxIcon />
               </div>
               <div className="player-name" style={{ color: "coral" }}>
                 {username}
@@ -315,6 +576,9 @@ export default function Game({ socket, roomID, username }) {
               <div className="roomid">
                 <h5>
                   Room: <b>{roomID}</b>
+                </h5>
+                <h5 style={{ marginLeft: "5px", marginRight: "5px" }}>
+                  {rule}
                 </h5>
                 <h5>
                   Turn: <b>{isYourTurn ? "You" : opponentPlayer}</b>
@@ -337,16 +601,34 @@ export default function Game({ socket, roomID, username }) {
             </div>
             <div className="player">
               <div className="avatar">
-                <BsPersonSquare />
+                <AccountBoxIcon />
               </div>
               <div className="player-name">{opponentPlayer}</div>
             </div>
           </div>
-          <Board
-            squares={board}
-            lastMove={lastMove}
-            onClick={handleClickNothing}
-          />
+
+          {winner === username ? (
+            <div class="pyro">
+              <div class="before"></div>
+              <Board
+                squares={board}
+                lastMove={lastMove}
+                onClick={handleClickNothing}
+              />
+              <div class="after"></div>
+            </div>
+          ) : (
+            <div>
+              <div className="game-over">
+                <img src={gif_cry} alt="game-over" />
+              </div>
+              <Board
+                squares={board}
+                lastMove={lastMove}
+                onClick={handleClickNothing}
+              />
+            </div>
+          )}
 
           <div className="bottom">
             <div className="controller">
@@ -354,17 +636,17 @@ export default function Game({ socket, roomID, username }) {
                 New Game
               </button>
 
-              <button className="button undo" onClick={undoGame}>
-                Undo
-              </button>
-              <button className="button draw" onClick={drawGame}>
-                Draw
-              </button>
-              <button className="button leave" onClick={leaveGame}>
+              <button
+                className="button leave"
+                onClick={(event) => (window.location.href = "/")}
+              >
                 Leave
               </button>
             </div>
           </div>
+          <audio className="audio-element">
+            <source src={sound_firework}></source>
+          </audio>
         </>
       );
       // eslint-disable-next-line
@@ -372,320 +654,4 @@ export default function Game({ socket, roomID, username }) {
     default:
       return <div>Loading...</div>;
   }
-}
-
-// ========================================
-
-function calculateWinner(board) {
-  //check draw
-  if (board.every((value) => value !== null)) {
-    return "draw";
-  }
-
-  //check win
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-      return board[a];
-    }
-  }
-  return null;
-}
-function caroCalculateWinner(board, last_move) {
-  //check draw
-  if (board.every((value) => value !== null)) {
-    return "draw";
-  }
-
-  const init_col = last_move % 20;
-  const init_row = (last_move - init_col) / 20;
-
-  var piece = board[last_move];
-
-  var newBoard = [];
-  var tempList = [];
-  var j = 0;
-  for (let k = 0; k < board.length; k++) {
-    if (j < 20) {
-      tempList.push(board[k]);
-      j = j + 1;
-    } else {
-      newBoard.push(tempList);
-      tempList = [];
-      tempList.push(board[k]);
-      j = 1;
-    }
-  }
-  newBoard.push(tempList);
-
-  console.log("---------------------------------------------");
-  console.log(
-    "last_move: " + last_move,
-    "piece: " + piece,
-    "init_row: " + init_row,
-    "init_col: " + init_col
-  );
-
-  console.log(newBoard);
-
-  var count, col, row, last1, last2;
-
-  //check column
-  count = 1;
-  last1 = init_row;
-  last2 = init_row;
-
-  row = init_row - 1;
-
-  while (row >= 0 && newBoard[row][init_col] === piece) {
-    count += 1;
-    row = row - 1;
-    last1 = row;
-  }
-
-  row = init_row + 1;
-  while (row <= 19 && newBoard[row][init_col] === piece) {
-    count += 1;
-    row = row + 1;
-    last2 = row;
-  }
-
-  if (count >= 5) {
-    console.log(
-      "last_move: ",
-      last_move,
-      ", piece: ",
-      piece,
-      ", init_row: ",
-      init_row,
-      ", init_col: ",
-      init_col,
-      ", count: ",
-      count,
-      ", last1: ",
-      last1,
-      ", last2: ",
-      last2
-    );
-    if (last1 <= 0) {
-      console.log("%cColumn1", "color: yellow");
-      return board[last_move];
-    } else if (last2 > 19) {
-      console.log("%cColumn2", "color: yellow");
-      return board[last_move];
-    } else {
-      if (
-        newBoard[last1][init_col] === null ||
-        newBoard[last2][init_col] === null
-      ) {
-        console.log("%cColumn3", "color: yellow");
-        return board[last_move];
-      }
-    }
-  }
-
-  //check row
-  count = 1;
-  last1 = init_col;
-  last2 = init_col;
-
-  col = init_col - 1;
-  while (col >= 0 && newBoard[init_row][col] === piece) {
-    count += 1;
-    col = col - 1;
-    last1 = col;
-  }
-
-  col = init_col + 1;
-  while (col <= 19 && newBoard[init_row][col] === piece) {
-    count += 1;
-    col = col + 1;
-    last2 = col;
-  }
-
-  if (count >= 5) {
-    console.log(
-      "last_move: ",
-      last_move,
-      ", piece: ",
-      piece,
-      ", init_row: ",
-      init_row,
-      ", init_col: ",
-      init_col,
-      ", count: ",
-      count,
-      ", last1: ",
-      last1,
-      ", last2: ",
-      last2
-    );
-    if (last1 <= 0) {
-      console.log("%cRow1", "color: yellow");
-      return board[last_move];
-    } else if (last2 > 19) {
-      console.log("%cRow2", "color: yellow");
-      return board[last_move];
-    } else {
-      if (
-        newBoard[init_row][last1] === null ||
-        newBoard[init_row][last2] === null
-      ) {
-        console.log("%cRow3", "color: yellow");
-        return board[last_move];
-      }
-    }
-  }
-
-  var last1_row, last1_col, last2_row, last2_col;
-  //check cross left-right
-  count = 1;
-  last1_row = init_row;
-  last1_col = init_col;
-  last2_row = init_row;
-  last2_col = init_col;
-
-  row = init_row - 1;
-  col = init_col - 1;
-  while (row >= 0 && col >= 0 && newBoard[row][col] === piece) {
-    count += 1;
-    row = row - 1;
-    col = col - 1;
-    last1_row = row;
-    last1_col = col;
-  }
-
-  row = init_row + 1;
-  col = init_col + 1;
-  while (row <= 19 && col <= 19 && newBoard[row][col] === piece) {
-    count += 1;
-    row = row + 1;
-    col = col + 1;
-    last2_row = row;
-    last2_col = col;
-  }
-
-  if (count >= 5) {
-    console.log(
-      "last_move: ",
-      last_move,
-      ", piece: ",
-      piece,
-      ", init_row: ",
-      init_row,
-      ", init_col: ",
-      init_col,
-      ", count: ",
-      count,
-      ", last1_row: ",
-      last1_row,
-      ", last1_col: ",
-      last1_col,
-      ", last2_row: ",
-      last2_row,
-      ", last2_col: ",
-      last2_col
-    );
-    if (last1_col <= 0) {
-      console.log("%cCross-left-right1", "color: yellow");
-      return board[last_move];
-    } else if (last1_row <= 0) {
-      console.log("%cCross-left-right2", "color: yellow");
-      return board[last_move];
-    } else if (last2_row > 19) {
-      console.log("%cCross-left-right3", "color: yellow");
-      return board[last_move];
-    } else {
-      if (
-        newBoard[last1_row][last1_col] === null ||
-        newBoard[last2_row][last2_col] === null
-      ) {
-        console.log("%cCross-left-right4", "color: yellow");
-        return board[last_move];
-      }
-    }
-  }
-
-  //check cross right-left
-  count = 1;
-  last1_row = init_row;
-  last1_col = init_col;
-  last2_row = init_row;
-  last2_col = init_col;
-
-  row = init_row - 1;
-  col = init_col + 1;
-  while (row >= 0 && col <= 19 && newBoard[row][col] === piece) {
-    count += 1;
-    row = row - 1;
-    col = col + 1;
-    last1_row = row;
-    last1_col = col;
-  }
-
-  row = init_row + 1;
-  col = init_col - 1;
-  while (row <= 19 && col >= 0 && newBoard[row][col] === piece) {
-    count += 1;
-    row = row + 1;
-    col = col - 1;
-    last2_row = row;
-    last2_col = col;
-  }
-
-  if (count >= 5) {
-    console.log(
-      "last_move: ",
-      last_move,
-      ", piece: ",
-      piece,
-      ", init_row: ",
-      init_row,
-      ", init_col: ",
-      init_col,
-      ", count: ",
-      count,
-      ", last1_row: ",
-      last1_row,
-      ", last1_col: ",
-      last1_col,
-      ", last2_row: ",
-      last2_row,
-      ", last2_col: ",
-      last2_col
-    );
-    if (last1_row <= 0) {
-      console.log("%cCross-right-left1", "color: yellow");
-      return board[last_move];
-    } else if (last1_col >= 19) {
-      console.log("%cCross-right-left2", "color: yellow");
-      return board[last_move];
-    } else if (last2_row >= 19) {
-      console.log("%cCross-right-left3", "color: yellow");
-      return board[last_move];
-    } else if (last2_col <= 0) {
-      console.log("%cCross-right-left4", "color: yellow");
-      return board[last_move];
-    } else {
-      if (
-        newBoard[last1_row][last1_col] === null ||
-        newBoard[last2_row][last2_col] === null
-      ) {
-        console.log("%cCross-right-left5", "color: yellow");
-        return board[last_move];
-      }
-    }
-  }
-
-  return null;
 }

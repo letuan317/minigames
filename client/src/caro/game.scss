@@ -5,10 +5,19 @@ $background-square: rgb(198, 239, 253);
 $background-square-last-move: rgb(226, 238, 115);
 $border: rgb(127, 214, 243);
 $background-info: rgb(88, 100, 100);
-$min-board: 500px;
+$min-board: 380px;
+$middle-board: 80vw;
 $max-board: 700px;
+
+$color-light-blue: #8ecae6;
+$color-blue: #219ebc;
+$color-dark-blue: #023047;
+$color-yellow: #ffb703;
+$color-orange: #fb8500;
+
 .caroContainer {
   background-color: black;
+  width: 100%;
   .caro-o {
     color: #2a9d8f;
   }
@@ -19,7 +28,7 @@ $max-board: 700px;
     background-color: $background-info;
     display: flex;
     align-items: center;
-    width: clamp($min-board, 80vw, $max-board);
+    width: clamp($min-board, $middle-board, $max-board);
     margin-bottom: 5px;
     padding-top: 10px;
 
@@ -31,7 +40,7 @@ $max-board: 700px;
       }
       .player-name {
         position: relative;
-        font-size: 1.5rem;
+        font-size: clamp(1.5rem, 100%, 2rem);
       }
     }
     .info {
@@ -39,6 +48,9 @@ $max-board: 700px;
         text-align: center;
         margin-bottom: 0px;
         display: flex;
+        h5 {
+          font-size: clamp(0.8rem, 80%, 3rem);
+        }
         b {
           color: #f4a261;
         }
@@ -47,11 +59,13 @@ $max-board: 700px;
         display: flex;
         align-items: center;
         letter-spacing: 5px;
-        font-size: 30px;
+        font-size: clamp(2rem, 100%, 3rem);
         padding-bottom: 10px;
         .piece {
           font-family: "Permanent Marker", cursive;
-          padding: 0 40px;
+          padding: 0 20px;
+        }
+        .points {
         }
       }
     }
@@ -79,7 +93,57 @@ $max-board: 700px;
   .caro-last-move {
     background: $background-square-last-move;
   }
+  .overlay {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 10000;
+    .popup {
+      width: 80%;
+      padding: 15px;
+      left: 0;
+      margin-left: 10%;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: $background-info;
+      position: absolute;
+      top: 15%;
+      box-shadow: 5px 5px 5px #000;
+      z-index: 10001;
+      text-align: center;
+      button {
+        color: black;
+        width: 100px;
+        height: 30px;
+        margin: auto 5%;
+        border-radius: 5px;
+      }
+    }
+  }
+  .alert {
+    padding: 20px;
+    background-color: #f44336;
+    color: white;
+  }
 
+  .closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .closebtn:hover {
+    color: black;
+  }
   .bottom {
     background-color: $background-info;
     display: flex;
@@ -121,5 +185,153 @@ $max-board: 700px;
     .leave {
       background-color: #e76f51;
     }
+    .emoji01 {
+      background-color: #ffb703;
+    }
+    .emoji02 {
+      background-color: #219ebc;
+    }
+  }
+
+  $particles: 50;
+  $width: 200;
+  $height: 200;
+
+  // Create the explosion...
+  $box-shadow: ();
+  $box-shadow2: ();
+  @for $i from 0 through $particles {
+    $box-shadow: $box-shadow,
+      random($width)-$width /
+        2 +
+        px
+        random($height)-$height /
+        1.2 +
+        px
+        hsl(random(360), 100, 50);
+    $box-shadow2: $box-shadow2, 0 0 #fff;
+  }
+  @mixin keyframes($animationName) {
+    @-webkit-keyframes #{$animationName} {
+      @content;
+    }
+
+    @-moz-keyframes #{$animationName} {
+      @content;
+    }
+
+    @-o-keyframes #{$animationName} {
+      @content;
+    }
+
+    @-ms-keyframes #{$animationName} {
+      @content;
+    }
+
+    @keyframes #{$animationName} {
+      @content;
+    }
+  }
+
+  @mixin animation-delay($settings) {
+    -moz-animation-delay: $settings;
+    -webkit-animation-delay: $settings;
+    -o-animation-delay: $settings;
+    -ms-animation-delay: $settings;
+    animation-delay: $settings;
+  }
+
+  @mixin animation-duration($settings) {
+    -moz-animation-duration: $settings;
+    -webkit-animation-duration: $settings;
+    -o-animation-duration: $settings;
+    -ms-animation-duration: $settings;
+    animation-duration: $settings;
+  }
+
+  @mixin animation($settings) {
+    -moz-animation: $settings;
+    -webkit-animation: $settings;
+    -o-animation: $settings;
+    -ms-animation: $settings;
+    animation: $settings;
+  }
+
+  @mixin transform($settings) {
+    transform: $settings;
+    -moz-transform: $settings;
+    -webkit-transform: $settings;
+    -o-transform: $settings;
+    -ms-transform: $settings;
+  }
+
+  .pyro > .before,
+  .pyro > .after {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    box-shadow: $box-shadow2;
+    @include animation(
+      (
+        1s bang ease-out infinite backwards,
+        1s gravity ease-in infinite backwards,
+        5s position linear infinite backwards
+      )
+    );
+  }
+
+  .pyro > .after {
+    @include animation-delay((1.25s, 1.25s, 1.25s));
+    @include animation-duration((1.25s, 1.25s, 6.25s));
+  }
+
+  @include keyframes(bang) {
+    to {
+      box-shadow: $box-shadow;
+    }
+  }
+
+  @include keyframes(gravity) {
+    to {
+      @include transform(translateY(200px));
+      opacity: 0;
+    }
+  }
+
+  @include keyframes(position) {
+    0%,
+    19.9% {
+      margin-top: 0%;
+      margin-left: 30%;
+    }
+    20%,
+    39.9% {
+      margin-top: 10%;
+      margin-left: 30%;
+    }
+    40%,
+    59.9% {
+      margin-top: 5%;
+      margin-left: 40%;
+    }
+    60%,
+    79.9% {
+      margin-top: 10%;
+      margin-left: 20%;
+    }
+    80%,
+    99.9% {
+      margin-top: 10%;
+      margin-left: 30%;
+    }
+  }
+
+  .game-over {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto auto;
+    z-index: 999;
   }
 }

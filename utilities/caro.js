@@ -27,6 +27,7 @@ function caro_make_room(Rooms) {
   Rooms.set(roomID, {
     roomID: roomID,
     players: [],
+    rule: "rule1",
     board: [],
     history: [],
     lastWinner: null,
@@ -61,7 +62,12 @@ function caro_kick(Rooms, roomID) {
 
 //Check how many player is currently in the room
 function caro_get_number_of_players(Rooms, roomID) {
-  return Rooms.get(roomID).players.length;
+  try {
+    const no_of_players = Rooms.get(roomID).players.length;
+    return no_of_players;
+  } catch (err) {
+    return 0;
+  }
 }
 
 //Assign x o values to each of the player class
