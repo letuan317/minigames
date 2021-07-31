@@ -19,7 +19,7 @@ const {
 app.use(express());
 app.use(cors());
 
-var port = process.env.PORT || 8000;
+var port = process.env.PORT || 3000;
 
 //app.use(express.static(__dirname + "/build"));
 
