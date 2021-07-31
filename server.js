@@ -11,23 +11,17 @@ const {
   caro_rand_piece,
   caro_new_game,
   caro_player_join_room,
-  caro_kick,
   caro_get_number_of_players,
   caro_piece_assignment,
-  caro_check_winner,
-  caro_create_new_board,
   caro_switch_turn,
 } = require("./utilities/caro");
-
-const { rand_room_id, rand_player_id } = require("./utilities/utilities");
 
 app.use(express());
 app.use(cors());
 
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 8000;
 
-console.log(__dirname + "/build");
-app.use(express.static(__dirname + "/build"));
+//app.use(express.static(__dirname + "/build"));
 
 var server = app.listen(
   port,
@@ -153,7 +147,7 @@ io.on("connection", (socket) => {
       const players = Rooms.get(roomID).players;
       const numberOfPlayers = caro_get_number_of_players(Rooms, roomID);
 
-      if (numberOfPlayers == 1) {
+      if (numberOfPlayers === 1) {
         if (players[0].name !== username) {
           console.log("caro_join_room", roomID, username, "can join");
           const userID = socket.id;
@@ -199,10 +193,10 @@ io.on("connection", (socket) => {
       const currentRoom = Rooms.get(roomID);
       const players = currentRoom.players;
       var message = "";
-      if (numberOfPlayers == 1) {
+      if (numberOfPlayers === 1) {
         message = "waiting";
         io.to(roomID).emit("caro_game_status", { message, players });
-      } else if (numberOfPlayers == 2) {
+      } else if (numberOfPlayers === 2) {
         message = "welcome";
         io.to(roomID).emit("caro_game_status", { message, players });
       }
@@ -353,43 +347,51 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     const userID = socket.id;
     const index = AllClients.findIndex((client) => client.userID === userID);
+    console.log("disconnect", userID);
 
     if (index !== -1) {
       const roomID = AllClients[index].roomID;
       if (Rooms.has(roomID)) {
+        console.log("disconnect", roomID);
         var currentRoom = Rooms.get(roomID);
         var players = currentRoom.players;
-        const index_player = players.findIndex(
-          (player) => player.id === userID
-        );
-        if (index_player !== -1) {
-          const player_left = players[index_player].name;
-          currentRoom.players = players.splice(index_player, 1)[0];
+        console.log("disconnect", "players.length", players.length);
+        if (players.length > 0) {
+          const index_player = players.findIndex(
+            (player) => player.id === userID
+          );
+          console.log("disconnect", "index_player", index_player);
+          if (index_player !== -1) {
+            console.log("disconnect", "players", currentRoom.players);
+            currentRoom.lastPlayers = [...currentRoom.players];
+            const player_left = players[index_player].name;
+            players.splice(index_player, 1);
 
-          const numberOfPlayers = caro_get_number_of_players(Rooms, roomID);
+            const numberOfPlayers = caro_get_number_of_players(Rooms, roomID);
+            console.log("disconnect", "players", currentRoom.players);
+            if (numberOfPlayers === 1) {
+              const message = "waiting";
 
-          if (numberOfPlayers === 1) {
-            const message = "waiting";
-
-            io.to(roomID).emit("caro_game_status", { message, players });
-            console.log(
-              "disconnect",
-              userID,
-              player_left,
-              "left the room",
-              roomID
-            );
-          } else if (numberOfPlayers === 0) {
-            currentRoom = Rooms.get(roomID);
-            Rooms.delete(currentRoom);
-            console.log(
-              "disconnect",
-              userID,
-              player_left,
-              "left the room and",
-              roomID,
-              "deleted"
-            );
+              io.to(roomID).emit("caro_game_status", { message, players });
+              console.log(
+                "disconnect",
+                userID,
+                player_left,
+                "left the room",
+                roomID
+              );
+            } else if (numberOfPlayers === 0) {
+              currentRoom = Rooms.get(roomID);
+              Rooms.delete(currentRoom);
+              console.log(
+                "disconnect",
+                userID,
+                player_left,
+                "left the room and",
+                roomID,
+                "deleted"
+              );
+            }
           }
         }
       }

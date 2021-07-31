@@ -31,6 +31,7 @@ function caro_make_room(Rooms) {
     board: [],
     history: [],
     lastWinner: null,
+    lastPlayers: [],
   });
   return roomID;
 }
@@ -50,7 +51,26 @@ function caro_new_game(Rooms, roomID) {
 //Put the newly joined player into a room's player list
 const caro_player_join_room = (Rooms, roomID, player) => {
   var currentRoom = Rooms.get(roomID);
-  var updatedPlayerList = currentRoom.players.push(player);
+  var updatedPlayerList = null;
+  console.log(
+    "caro_player_join_room",
+    currentRoom.players.length,
+    currentRoom.lastPlayers.length
+  );
+  if (currentRoom.lastPlayers.length === 2) {
+    if (player.name === currentRoom.lastPlayers[0].name) {
+      updatedPlayerList = currentRoom.players.push(player);
+      player.points = currentRoom.lastPlayers[0].points;
+      currentRoom.players[1].points = currentRoom.lastPlayers[1].points;
+    } else if (player.name === currentRoom.lastPlayers[1].name) {
+      updatedPlayerList = currentRoom.players.push(player);
+      player.points = currentRoom.lastPlayers[1].points;
+      currentRoom.players[0].points = currentRoom.lastPlayers[0].points;
+    }
+  } else {
+    updatedPlayerList = currentRoom.players.push(player);
+  }
+
   var updatedRoom = { ...currentRoom, players: updatedPlayerList };
 };
 

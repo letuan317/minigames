@@ -76,6 +76,7 @@ export default function Game({ socket, roomID, username }) {
   const [lastMove, setLastMove] = useState(0);
   const [undoRequest, setUndoRequest] = useState(false);
   const [drawRequest, setDrawRequest] = useState(false);
+  const [waitRequest, setWaitRequest] = useState(false);
   const [notify, setNotify] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -91,7 +92,7 @@ export default function Game({ socket, roomID, username }) {
   const [playGameOver] = useSound(sound_game_over, { volume: volume_adjust });
   const [playCountDown] = useSound(sound_countdown, { volume: volume_adjust });
   const [playYawnLong] = useSound(sound_yawn_long, { volume: volume_adjust });
-  const [playOoo] = useSound(sound_ooo, { volume: volume_adjust + 0.5 });
+  const [playOoo] = useSound(sound_ooo, { volume: volume_adjust + 0.2 });
 
   if (gameStatus === "loading") {
     console.log("loading");
@@ -142,6 +143,7 @@ export default function Game({ socket, roomID, username }) {
   };
   const undoGame = () => {
     playButton();
+    setWaitRequest(true);
     socket.emit("caro_undo_game", { roomID, username });
   };
   const requestundoyes = () => {
@@ -254,6 +256,7 @@ export default function Game({ socket, roomID, username }) {
       setUndoRequest(true);
     });
     socket.on("caro_request_undo_game_comfirmed", (check) => {
+      setWaitRequest(false);
       setNotify(true);
       if (check === true) {
         setMessage("Accepted to undo last move");
@@ -266,6 +269,7 @@ export default function Game({ socket, roomID, username }) {
       setDrawRequest(true);
     });
     socket.on("caro_request_draw_game_comfirmed", (check) => {
+      setWaitRequest(false);
       setNotify(true);
       if (check === true) {
         setMessage("Accepted to undo last move");
@@ -506,6 +510,16 @@ export default function Game({ socket, roomID, username }) {
                     YES
                   </button>
                 </div>
+              </div>
+            </div>
+          ) : (
+            <div></div>
+          )}
+
+          {waitRequest ? (
+            <div class="overlay">
+              <div class="popup">
+                <p>Waiting ...</p>
               </div>
             </div>
           ) : (
