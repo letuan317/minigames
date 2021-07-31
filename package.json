@@ -14,10 +14,13 @@
   },
   "scripts": {
     "start": "node server.js",
+    "dev": "concurrently 'npm run server' 'npm run react'",
     "server": "node server.js",
-    "client": "cd client && npm start"
+    "client": "cd client && npm start",
+    "heroku-postbuild": "cd client && npm install && npm run build"
   },
   "devDependencies": {
-    "nodemon": "^2.0.12"
+    "nodemon": "^2.0.12",
+    "concurrently": "^3.5.0"
   }
 }
