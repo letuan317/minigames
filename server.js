@@ -24,7 +24,7 @@ const { rand_room_id, rand_player_id } = require("./utilities/utilities");
 app.use(express());
 app.use(cors());
 
-const port = 8000;
+const port = 3000;
 
 var server = app.listen(
   port,
