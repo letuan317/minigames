@@ -48,11 +48,11 @@ class Client {
 }
 
 function update_client(userID, roomID) {
-  index = AllClients.findIndex((client) => client.id === userID);
+  const index = AllClients.findIndex((client) => client.id === userID);
   if (index !== -1) {
     AllClients[index].roomID = roomID;
   } else {
-    new_client = { userID, roomID };
+    const new_client = { userID, roomID };
     AllClients.push(new_client);
   }
 }
@@ -355,7 +355,7 @@ io.on("connection", (socket) => {
     const index = AllClients.findIndex((client) => client.userID === userID);
 
     if (index !== -1) {
-      roomID = AllClients[index].roomID;
+      const roomID = AllClients[index].roomID;
       if (Rooms.has(roomID)) {
         var currentRoom = Rooms.get(roomID);
         var players = currentRoom.players;
@@ -363,12 +363,12 @@ io.on("connection", (socket) => {
           (player) => player.id === userID
         );
         if (index_player !== -1) {
-          player_left = players[index_player].name;
-          players.splice(index_player, 1)[0];
+          const player_left = players[index_player].name;
+          currentRoom.players = players.splice(index_player, 1)[0];
 
           const numberOfPlayers = caro_get_number_of_players(Rooms, roomID);
 
-          if (numberOfPlayers == 1) {
+          if (numberOfPlayers === 1) {
             const message = "waiting";
 
             io.to(roomID).emit("caro_game_status", { message, players });
@@ -379,7 +379,7 @@ io.on("connection", (socket) => {
               "left the room",
               roomID
             );
-          } else if (numberOfPlayers == 0) {
+          } else if (numberOfPlayers === 0) {
             currentRoom = Rooms.get(roomID);
             Rooms.delete(currentRoom);
             console.log(

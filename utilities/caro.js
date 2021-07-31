@@ -22,7 +22,7 @@ class caro_history {
 function caro_make_room(Rooms) {
   var roomID = rand_room_id();
   while (Rooms.has(roomID)) {
-    roomID = rand_room();
+    roomID = rand_room_id();
   }
   Rooms.set(roomID, {
     roomID: roomID,
@@ -41,7 +41,7 @@ function caro_rand_piece() {
 
 //Initialize a new board to a room
 function caro_new_game(Rooms, roomID) {
-  currentRoom = Rooms.get(roomID);
+  var currentRoom = Rooms.get(roomID);
   //const board = Array(9).fill(null);
   currentRoom.board = caro_create_new_board();
   currentRoom.history = [];
@@ -49,14 +49,14 @@ function caro_new_game(Rooms, roomID) {
 
 //Put the newly joined player into a room's player list
 const caro_player_join_room = (Rooms, roomID, player) => {
-  currentRoom = Rooms.get(roomID);
-  updatedPlayerList = currentRoom.players.push(player);
-  updatedRoom = { ...currentRoom, players: updatedPlayerList };
+  var currentRoom = Rooms.get(roomID);
+  var updatedPlayerList = currentRoom.players.push(player);
+  var updatedRoom = { ...currentRoom, players: updatedPlayerList };
 };
 
 //Remove the latest player joined from a room's player list
 function caro_kick(Rooms, roomID) {
-  currentRoom = Rooms.get(roomID);
+  var currentRoom = Rooms.get(roomID);
   currentRoom.players.pop();
 }
 
@@ -75,7 +75,7 @@ function caro_piece_assignment(Rooms, roomID) {
   const firstPiece = caro_rand_piece();
   const lastPiece = firstPiece === "X" ? "O" : "X";
 
-  currentRoom = Rooms.get(roomID);
+  var currentRoom = Rooms.get(roomID);
   currentRoom.players[0].piece = firstPiece;
   currentRoom.players[1].piece = lastPiece;
 }

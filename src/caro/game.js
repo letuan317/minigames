@@ -14,6 +14,7 @@ import sound_game_start from "../assests/sounds/medieval-show-fanfare-announceme
 import sound_game_over from "../assests/sounds/game-over.mp3";
 import sound_countdown from "../assests/sounds/countdown.mp3";
 import sound_yawn_long from "../assests/sounds/long-yawn.mp3";
+import sound_ooo from "../assests/sounds/ooo.mp3";
 
 import gif_cry from "../assests/images/cry.gif";
 
@@ -78,15 +79,19 @@ export default function Game({ socket, roomID, username }) {
   const [notify, setNotify] = useState(false);
   const [message, setMessage] = useState("");
 
-  const [playWrite] = useSound(sound_write);
-  const [playFirework] = useSound(sound_firework, { volume: 0.5 });
-  const [playButton] = useSound(sound_button);
-  const [playNotification] = useSound(sound_notification);
-  const [playError] = useSound(sound_error);
-  const [playNewGame] = useSound(sound_game_start, { volume: 0.5 });
-  const [playGameOver] = useSound(sound_game_over);
-  const [playCountDown] = useSound(sound_countdown);
-  const [playYawnLong] = useSound(sound_yawn_long);
+  const volume_adjust = 0.2;
+  const [playWrite] = useSound(sound_write, { volume: volume_adjust });
+  const [playFirework] = useSound(sound_firework, { volume: volume_adjust });
+  const [playButton] = useSound(sound_button, { volume: volume_adjust });
+  const [playNotification] = useSound(sound_notification, {
+    volume: volume_adjust,
+  });
+  const [playError] = useSound(sound_error, { volume: volume_adjust });
+  const [playNewGame] = useSound(sound_game_start, { volume: volume_adjust });
+  const [playGameOver] = useSound(sound_game_over, { volume: volume_adjust });
+  const [playCountDown] = useSound(sound_countdown, { volume: volume_adjust });
+  const [playYawnLong] = useSound(sound_yawn_long, { volume: volume_adjust });
+  const [playOoo] = useSound(sound_ooo, { volume: volume_adjust + 0.5 });
 
   if (gameStatus === "loading") {
     console.log("loading");
@@ -241,7 +246,7 @@ export default function Game({ socket, roomID, username }) {
       if (data.player_win === username) {
         playFirework();
       } else {
-        playGameOver();
+        Math.random() > 0.5 ? playGameOver() : playOoo();
       }
     });
 
