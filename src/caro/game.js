@@ -308,6 +308,7 @@ export default function Game({ socket, roomID, username }) {
     playGameOver,
     playCountDown,
     playYawnLong,
+    playOoo,
   ]);
 
   switch (gameStatus) {
