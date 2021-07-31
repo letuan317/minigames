@@ -26,6 +26,9 @@ app.use(cors());
 
 var port = process.env.PORT || 3000;
 
+console.log(__dirname + "/build");
+app.use(express.static(__dirname + "/build"));
+
 var server = app.listen(
   port,
   console.log(`Server is running on the port no: ${port} `.green)
