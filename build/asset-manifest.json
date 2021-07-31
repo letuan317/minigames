@@ -1,0 +1,36 @@
+{
+  "files": {
+    "main.css": "/static/css/main.3d16622e.chunk.css",
+    "main.js": "/static/js/main.eec80dd2.chunk.js",
+    "main.js.map": "/static/js/main.eec80dd2.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.7c46a9da.js",
+    "runtime-main.js.map": "/static/js/runtime-main.7c46a9da.js.map",
+    "static/css/2.81f61aa4.chunk.css": "/static/css/2.81f61aa4.chunk.css",
+    "static/js/2.a1191fd7.chunk.js": "/static/js/2.a1191fd7.chunk.js",
+    "static/js/2.a1191fd7.chunk.js.map": "/static/js/2.a1191fd7.chunk.js.map",
+    "static/js/3.a3a746c0.chunk.js": "/static/js/3.a3a746c0.chunk.js",
+    "static/js/3.a3a746c0.chunk.js.map": "/static/js/3.a3a746c0.chunk.js.map",
+    "index.html": "/index.html",
+    "static/css/2.81f61aa4.chunk.css.map": "/static/css/2.81f61aa4.chunk.css.map",
+    "static/css/main.3d16622e.chunk.css.map": "/static/css/main.3d16622e.chunk.css.map",
+    "static/js/2.a1191fd7.chunk.js.LICENSE.txt": "/static/js/2.a1191fd7.chunk.js.LICENSE.txt",
+    "static/js/3.a3a746c0.chunk.js.LICENSE.txt": "/static/js/3.a3a746c0.chunk.js.LICENSE.txt",
+    "static/media/arcade-game-jump-coin.57d12273.mp3": "/static/media/arcade-game-jump-coin.57d12273.mp3",
+    "static/media/computer-error.6e90e514.mp3": "/static/media/computer-error.6e90e514.mp3",
+    "static/media/countdown.741437ad.mp3": "/static/media/countdown.741437ad.mp3",
+    "static/media/cry.b263c544.gif": "/static/media/cry.b263c544.gif",
+    "static/media/firework.091f1af2.mp3": "/static/media/firework.091f1af2.mp3",
+    "static/media/game-over.a7f08844.mp3": "/static/media/game-over.a7f08844.mp3",
+    "static/media/long-yawn.06978f24.mp3": "/static/media/long-yawn.06978f24.mp3",
+    "static/media/medieval-show-fanfare-announcement.f8a80fe7.mp3": "/static/media/medieval-show-fanfare-announcement.f8a80fe7.mp3",
+    "static/media/retro-arcade-casino-notification.79f16492.mp3": "/static/media/retro-arcade-casino-notification.79f16492.mp3",
+    "static/media/writing-scribble-on-paper.9f55ee3c.mp3": "/static/media/writing-scribble-on-paper.9f55ee3c.mp3"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.7c46a9da.js",
+    "static/css/2.81f61aa4.chunk.css",
+    "static/js/2.a1191fd7.chunk.js",
+    "static/css/main.3d16622e.chunk.css",
+    "static/js/main.eec80dd2.chunk.js"
+  ]
+}

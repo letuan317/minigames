@@ -1,26 +1,73 @@
 {
   "name": "minigames",
   "version": "1.0.0",
+  "private": true,
+  "proxy": "",
   "main": "index.js",
   "repository": "https://github.com/letuan317/minigames.git",
   "author": "letuan317 <letuan317@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@material-ui/core": "^4.12.2",
+    "@material-ui/icons": "^4.11.2",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "aes256": "^1.1.0",
+    "bootstrap": "^5.0.2",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "socket.io": "^4.0.0"
+    "node-sass": "^5.0.0",
+    "query-string": "^7.0.0",
+    "react": "^17.0.2",
+    "react-bootstrap": "^1.6.1",
+    "react-dom": "^17.0.2",
+    "react-hooks": "^1.0.1",
+    "react-icons": "^4.2.0",
+    "react-lottie": "^1.2.3",
+    "react-redux": "^7.2.3",
+    "react-router": "^5.2.0",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "^4.0.3",
+    "reactjs-popup": "^2.0.5",
+    "redux": "^4.0.5",
+    "socket.io": "^4.0.0",
+    "socket.io-client": "^4.0.0",
+    "use-sound": "^4.0.1",
+    "web-vitals": "^1.1.1"
   },
   "scripts": {
     "start": "node server.js",
     "dev": "concurrently 'npm run server' 'npm run react'",
     "server": "node server.js",
-    "client": "cd client && npm start",
+    "client": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
     "heroku-postbuild": "cd client && npm install && npm run build"
   },
   "devDependencies": {
-    "nodemon": "^2.0.12",
-    "concurrently": "^3.5.0"
+    "concurrently": "^3.5.0",
+    "nodemon": "^2.0.12"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
